@@ -1,13 +1,13 @@
 var mysql = require('mysql');
-var mysql = require('./config').mysql;
+var mysqlConfig = require('./config').mysql;
 
 var pool = mysql.createPool({
-    connectionLimit: config.connectionLimit,
-    host: config.host,
-    user: config.user,
-    password: config.password,
-    database: config.database,
-    debug: config.debug
+    connectionLimit: mysqlConfig.connectionLimit,
+    host: mysqlConfig.host,
+    user: mysqlConfig.user,
+    password: mysqlConfig.password,
+    database: mysqlConfig.database,
+    debug: mysqlConfig.debug
 });
 
 var getConnection = function (callback) {
