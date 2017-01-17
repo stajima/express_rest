@@ -1,6 +1,12 @@
 var express = require('express');
+var logger = require('morgan');
 
 var app = express();
+
+/**
+ * Setting up basic middleware for all Express requests
+ */
+app.use(logger('dev')); // Log requests to API using morgan
 
 /*
  * Use Gulp set port. Use port 3000 as backup.

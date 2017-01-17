@@ -1,8 +1,6 @@
 var agentController = function () {
-    /**
-     * Get a connection from the mysql db pool.
-     */
-    var getConnection = require('../connection');
+
+    var agentModel = require('../models/agentModel')();
 
     /**
      * Function for when a get is called on the agents route.
@@ -10,15 +8,12 @@ var agentController = function () {
      * If succesful it returns the rows in json otherwise sends a 500 status code and the err msg.
      */
     var get = function (req, res) {
-        getConnection(function (err, connection) {
-            connection.query("SELECT * FROM Agents LIMIT 1", function (err, rows) {
-                connection.release();
-                if (!err) {
-                    res.json(rows);
-                } else {
-                    res.status(500).send(err);
-                }
-            });
+        agentModel.getAllAgents(function (err, rows) {
+            if (!err) {
+                res.json(rows);
+            } else {
+                res.status(500).send(err);
+            }
         });
     }
 
@@ -26,6 +21,6 @@ var agentController = function () {
         get: get
     }
 
-}
+};
 
 module.exports = agentController;
