@@ -3,7 +3,7 @@ var agentModel = function () {
     /**
      * Get a connection from the mysql db pool.
      */
-    var getConnection = require('../connection');
+    var getConnection = require('../config/connection');
 
     /**
      * Gets all agents from Agents table
