@@ -1,6 +1,7 @@
 const express = require('express');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
+const passport = require('passport');
 const authenticationController = require('./controllers/authenticationController');
 
 const app = express();
@@ -33,8 +34,9 @@ app.use('/api/Agents', agentRouter);
 /**
  * Require and use authenticationController.login if requested route is /login
  */
+const requireLogin = passport.authenticate('local', { session: false });
 const authenticationRouter = require('./routes/authenticationRoutes')();
-app.use('/login', authenticationRouter);
+app.post('/login', requireLogin, authenticationRouter);
 
 /*
  * Start express server.
