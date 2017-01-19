@@ -7,7 +7,9 @@ const routes = function () {
     /*
      * If root route is requested use the authenticationController get method.
     */
-    authenticationRouter.route('/').post(authenticationController.login);
+    authenticationRouter.route('/')
+        // .get(authenticationController.verify)
+        .post(authenticationController.login);
 
     return authenticationRouter;
 };

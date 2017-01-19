@@ -7,25 +7,31 @@ const authenticationController = () => {
     }
 
     setUserInfo = (request) => {
-        //TODO
         return {
-            userInfo: 'blah blah'
+            DBID: request.DBID,
+            ID: request.ID,
+            EMAIL: request.Email
         }
     }
 
     let login = (req, res, next) => {
-        //TODO req.user is undefined. Most likely because of something in passport.js
         let userInfo = setUserInfo(req.user);
-        
+
         console.log('Generating JWT Key');
         res.status(200).json({
             token: 'JWT' + generateToken(userInfo),
-            userInfo: userInfo
+            user: userInfo
         });
     }
 
+    // let verify = (req, res) => {
+    //     console.log('verifing');
+    //     res.send('It worked! User id is: ' + req.user._id + '.');
+    // }
+
     return {
-        login: login
+        login: login,
+        // verify: verify
     }
 }
 

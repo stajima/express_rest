@@ -12,7 +12,7 @@ const app = express();
 app.use(logger('dev')); // Log requests to API using morgan
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-const requireAuth = passport.authenticate('awt', { session: false });
+const requireAuth = passport.authenticate('jwt', { session: false });
 const requireLogin = passport.authenticate('local', { session: false });
 
 /*
@@ -37,7 +37,7 @@ app.use('/api/Agents', agentRouter);
  * Route for /api/authentication
  */
 const authenticationRouter = require('./routes/authenticationRoutes')();
-app.use('/api/authentication', authenticationRouter);
+app.use('/api/login', requireLogin, authenticationRouter);
 
 /*
  * Start express server.

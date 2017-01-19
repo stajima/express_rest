@@ -16,14 +16,14 @@ passport.deserializeUser((id, done) => {
 });
 
 //set jwt authentication options
-const jwtOptions = {
-    jwtFromRequest: ExtractJwt.fromAuthHeader(),
-    secretOrKey: config.passport.key
-}
+// const jwtOptions = {
+//     jwtFromRequest: ExtractJwt.fromAuthHeader(),
+//     secretOrKey: config.passport.key
+// }
 
-passport.use(new jwtStrategy(jwtOptions, (payload, done) => {
-    //TODO what do I put here? Need to translate tutorial to SQL 
-}));
+// passport.use(new jwtStrategy(jwtOptions, (payload, done) => {
+//     console.log(payload);
+// }));
 
 //set alternative fields to use instead of passport defaults
 const localOptions = {
