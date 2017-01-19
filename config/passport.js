@@ -1,6 +1,9 @@
 const passport = require('passport');
-const LocalStrategy = require('passport-local');
-const connection = require('../config/connection');
+const jwtStrategy = require('passport-jwt').Strategy;
+const ExtractJwt = require('passport-jwt').ExtractJwt;
+const LocalStrategy = require('passport-local').Strategy;
+const getConnection = require('../config/connection');
+const config = require('./config');
 
 passport.serializeUser((user, done) => {
     done(null, user.DBID);
@@ -12,34 +15,46 @@ passport.deserializeUser((id, done) => {
     });
 });
 
+//set jwt authentication options
+const jwtOptions = {
+    jwtFromRequest: ExtractJwt.fromAuthHeader(),
+    secretOrKey: config.passport.key
+}
+
+passport.use(new jwtStrategy(jwtOptions, (payload, done) => {
+    //TODO what do I put here? Need to translate tutorial to SQL 
+}));
+
 //set alternative fields to use instead of passport defaults
 const localOptions = {
     usernameField: 'UID',
     passwordField: 'PID'
 }
 
-const localLogin = new LocalStrategy(localOptions, (UID, PID, done) => {
-    connection.query("SELECT `DBID` WHERE `UID` =  '" + UID + "'", (err, rows) => {
-        //return if err
-        if (err) {
-            console.log(err);
-            return done(err);
-        }
-        //if no results found then return with error msg
-        if (!rows.length) {
-            console.log('No user found');
-            return done(null, false, { error: 'No user found' });
-        }
-        //if user is found but password does not match return with msg
-        if (!row[0].PID === PID) {
-            console.log('Incorrect password');
-            return done(null, false, { error: 'Incorrect password' });
-        }
+passport.use(new LocalStrategy(localOptions, (UID, PID, done) => {
 
-        console.log(row[0]);
-        return done(null, row[0]);
+    getConnection((err, connection) => {
+        connection.query("SELECT * FROM `DBID` WHERE `UID` =  '" + UID + "'", (err, rows) => {
+            //return if err
+            if (err) {
+                console.log(err);
+                return done(err);
+            }
+            //if no results found then return with error msg
+            if (!rows.length) {
+                console.log('No user found');
+                return done(null, false, { error: 'No user found' });
+            }
+            //if user is found but password does not match return with msg
+            if (!rows[0].PID === PID) {
+                console.log('Incorrect password');
+                return done(null, false, { error: 'Incorrect password' });
+            }
+
+            // console.log(rows[0]);
+            return done(null, rows[0]);
+        });
     });
-});
 
-passport.use(localLogin);
+}));
 

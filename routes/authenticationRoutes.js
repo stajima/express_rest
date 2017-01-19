@@ -1,13 +1,13 @@
-var express = require('express');
+const express = require('express');
 
-var routes = function () {
-    var authenticationRouter = express.Router();
-    var authenticationController = require('../controllers/authenticationController')();
+const routes = function () {
+    let authenticationRouter = express.Router();
+    let authenticationController = require('../controllers/authenticationController')();
 
     /*
-     * If root route of /api/Agents is requested use the agentController get method.
+     * If root route is requested use the authenticationController get method.
     */
-    authenticationRouter.route('/').get(authenticationController.login);
+    authenticationRouter.route('/').post(authenticationController.login);
 
     return authenticationRouter;
 };

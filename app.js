@@ -1,17 +1,19 @@
 const express = require('express');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
+const passportService = require('./config/passport');
 const passport = require('passport');
-const authenticationController = require('./controllers/authenticationController');
 
 const app = express();
 
 /**
- * Setting up basic middleware for all Express requests
+ * Middleware 
  */
 app.use(logger('dev')); // Log requests to API using morgan
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+const requireAuth = passport.authenticate('awt', { session: false });
+const requireLogin = passport.authenticate('local', { session: false });
 
 /*
  * Use Gulp set port. Use port 3000 as backup.
@@ -32,11 +34,10 @@ const agentRouter = require('./routes/agentRoutes')();
 app.use('/api/Agents', agentRouter);
 
 /**
- * Require and use authenticationController.login if requested route is /login
+ * Route for /api/authentication
  */
-const requireLogin = passport.authenticate('local', { session: false });
 const authenticationRouter = require('./routes/authenticationRoutes')();
-app.post('/login', requireLogin, authenticationRouter);
+app.use('/api/authentication', authenticationRouter);
 
 /*
  * Start express server.
