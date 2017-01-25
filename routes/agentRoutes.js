@@ -1,4 +1,6 @@
 var express = require('express');
+const passport = require('passport');
+const requireAuth = passport.authenticate('jwt', { session: false });
 
 var routes = function () {
     var agentRouter = express.Router();
@@ -7,7 +9,7 @@ var routes = function () {
     /*
      * If root route of /api/Agents is requested use the agentController get method.
     */
-    agentRouter.route('/').get(agentController.get);
+    agentRouter.get('/', requireAuth, agentController.get);
 
     return agentRouter;
 };

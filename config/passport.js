@@ -1,29 +1,49 @@
 const passport = require('passport');
-const jwtStrategy = require('passport-jwt').Strategy;
+const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const LocalStrategy = require('passport-local').Strategy;
 const getConnection = require('../config/connection');
 const config = require('./config');
 
-passport.serializeUser((user, done) => {
-    done(null, user.DBID);
-});
+// passport.serializeUser((user, done) => {
+//     console.log('serializeUser');
+//     done(null, user.DBID);
+// });
 
-passport.deserializeUser((id, done) => {
-    connection.query("SELECT * FROM `DBID` WHERE `DBID` = " + id, (err, rows) => {
-        done(err, rows[0]);
-    });
-});
+// passport.deserializeUser((id, done) => {
+//     console.log('deserializeUser');
+//     connection.query("SELECT * FROM DBID WHERE DBID = " + id, (err, rows) => {
+//         done(err, rows[0]);
+//     });
+// });
 
 //set jwt authentication options
-// const jwtOptions = {
-//     jwtFromRequest: ExtractJwt.fromAuthHeader(),
-//     secretOrKey: config.passport.key
-// }
+const jwtOptions = {
+    jwtFromRequest: ExtractJwt.fromAuthHeader(),
+    secretOrKey: config.passport.key
+}
 
-// passport.use(new jwtStrategy(jwtOptions, (payload, done) => {
-//     console.log(payload);
-// }));
+passport.use(new JwtStrategy(jwtOptions, (payload, done) => {
+    console.log("JwtStrategy Hit");
+    getConnection((err, connection) => {
+        connection.query("SELECT * FROM DBID WHERE UID =  '" + payload.UID + "'", (err, rows) => {
+            //if theres a SQL error
+            if (err) {
+                console.log(err);
+                return done(err, false);
+            }
+            //if a user is found 
+            if (rows && rows[0]) {
+                done(null, rows[0]);
+            } else {
+                //if no user is found
+                console.log('false');
+                done(null, false);
+            }
+        });
+    });
+
+}));
 
 //set alternative fields to use instead of passport defaults
 const localOptions = {
@@ -34,7 +54,10 @@ const localOptions = {
 passport.use(new LocalStrategy(localOptions, (UID, PID, done) => {
 
     getConnection((err, connection) => {
-        connection.query("SELECT * FROM `DBID` WHERE `UID` =  '" + UID + "'", (err, rows) => {
+        //Query style to prevent SQL injection
+        let query = 'SELECT * FROM DBID WHERE UID = ' + connection.escape(UID)
+        connection.query(query, (err, rows) => {
+            connection.release();
             //return if err
             if (err) {
                 console.log(err);
@@ -46,7 +69,7 @@ passport.use(new LocalStrategy(localOptions, (UID, PID, done) => {
                 return done(null, false, { error: 'No user found' });
             }
             //if user is found but password does not match return with msg
-            if (!rows[0].PID === PID) {
+            if (!(rows[0].PID === PID)) {
                 console.log('Incorrect password');
                 return done(null, false, { error: 'Incorrect password' });
             }

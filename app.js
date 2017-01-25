@@ -12,8 +12,6 @@ const app = express();
 app.use(logger('dev')); // Log requests to API using morgan
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-const requireAuth = passport.authenticate('jwt', { session: false });
-const requireLogin = passport.authenticate('local', { session: false });
 
 /*
  * Use Gulp set port. Use port 3000 as backup.
@@ -31,13 +29,13 @@ app.get('/', function (req, res) {
  * Require and use the agentRouter if path requested is /api/Agents.
  */
 const agentRouter = require('./routes/agentRoutes')();
-app.use('/api/Agents', agentRouter);
+app.use('/api/agents', agentRouter);
 
 /**
  * Route for /api/authentication
  */
 const authenticationRouter = require('./routes/authenticationRoutes')();
-app.use('/api/login', requireLogin, authenticationRouter);
+app.use('/api/auth', authenticationRouter);
 
 /*
  * Start express server.

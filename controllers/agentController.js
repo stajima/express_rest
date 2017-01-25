@@ -10,7 +10,7 @@ var agentController = function () {
     var get = function (req, res) {
         agentModel.getAllAgents(function (err, rows) {
             if (!err) {
-                res.json(rows);
+                res.status(201).json(rows);
             } else {
                 res.status(500).send(err);
             }
