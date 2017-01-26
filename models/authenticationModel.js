@@ -30,17 +30,19 @@ let authenticationModel = () => {
             /**
             * Create insert statement add all keys/colummns onto query
             */
-            let query = "INSERT INTO DBID (" + Object.keys(newUser).join(", "); + ") ";
-            let values = "VALUES (";
+            let query = "INSERT INTO DBID (" + Object.keys(newUser).join(", ") + ") VALUES (";
 
             /**
              * Add all values with escape() to prevent injection
              */
+            let cleanedValues = [];
             for (let prop in newUser) {
-                values += connection.escape(newUser[prop]);
+                if (newUser.hasOwnProperty(prop)) {
+                    cleanedValues.push(connection.escape(newUser[prop]));
+                }
             }
 
-            query += ");";
+            query += cleanedValues + ");";
 
             console.log(query);
 
@@ -51,8 +53,10 @@ let authenticationModel = () => {
                 connection.release();
                 console.log("Connection released");
                 if (!err) {
+                    console.log("New user added to the DB");
                     callback(null, rows);
                 } else {
+                    console.log(err);
                     callback(err);
                 }
             });

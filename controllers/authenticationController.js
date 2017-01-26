@@ -1,19 +1,19 @@
 const authenticationController = () => {
     const jwt = require('jsonwebtoken');
     const config = require('../config/config');
-    const authenticationModel = require('../models/authenticationModel');
+    const authenticationModel = require('../models/authenticationModel')();
 
     /**
      * Generates JWT using user info and config key. 
      */
-    generateToken = (userInfo) => {
+    let generateToken = (userInfo) => {
         return jwt.sign(userInfo, config.passport.key, { expiresIn: 10080 });
     }
 
     /**
      * Controls which info gets passed back and is used in JWT creation
      */
-    setUserInfo = (request) => {
+    let setUserInfo = (request) => {
         return {
             DBID: request.DBID,
             UID: request.UID,
@@ -50,9 +50,9 @@ const authenticationController = () => {
 
         //Prep new user data
         let newUser = {};
-        newUser.DBID = "dbid " + new Date().toUTCString;
-        newUser.ID = Math.random().toString(36).substring(4);;
-        newUser.UID = req.body.UID || Math.random().toString(36).substring(7);;
+        newUser.DBID = "TEST-dbid" + new Date().getTime();
+        newUser.ID = Math.random().toString(36).substring(4);
+        newUser.UID = req.body.UID || Math.random().toString(36).substring(7);
         newUser.PID = Math.random().toString(36).substring(10);
 
         authenticationModel.addNewUser(newUser, (err, rows) => {

@@ -1,8 +1,6 @@
 const express = require('express');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
-const passportService = require('./config/passport');
-const passport = require('passport');
 
 const app = express();
 

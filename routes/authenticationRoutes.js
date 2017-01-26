@@ -4,7 +4,7 @@ const requireLogin = passport.authenticate('local', { session: false });
 const requireAuth = passport.authenticate('jwt', { session: false });
 
 /**
- * Routes reguarding /api/auth
+ * Routes regarding /api/auth
  */
 const routes = function () {
     let authenticationRouter = express.Router();
@@ -22,7 +22,7 @@ const routes = function () {
     authenticationRouter.get('/dashboard', requireAuth, authenticationController.verify);
 
     /**
-     * POST register route protected by JWT and used for new user registraion.
+     * POST register route protected by JWT and used for new user registration.
      */
     authenticationRouter.post('/register', authenticationController.register);
 
