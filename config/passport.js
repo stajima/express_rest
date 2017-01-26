@@ -55,7 +55,7 @@ passport.use(new LocalStrategy(localOptions, (UID, PID, done) => {
 
     getConnection((err, connection) => {
         //Query style to prevent SQL injection
-        let query = 'SELECT * FROM DBID WHERE UID = ' + connection.escape(UID)
+        let query = 'SELECT * FROM DBID WHERE UID = ' + connection.escape(UID);
         connection.query(query, (err, rows) => {
             connection.release();
             //return if err

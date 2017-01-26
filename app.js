@@ -1,6 +1,7 @@
 const express = require('express');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
+// const passport =  require('passport');
 
 const app = express();
 
@@ -10,6 +11,8 @@ const app = express();
 app.use(logger('dev')); // Log requests to API using morgan
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+// app.use(passport.initialize());
+
 
 /*
  * Use Gulp set port. Use port 3000 as backup.

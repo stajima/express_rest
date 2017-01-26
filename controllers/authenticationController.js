@@ -50,14 +50,27 @@ const authenticationController = () => {
 
         //Prep new user data
         let newUser = {};
-        newUser.DBID = "TEST-dbid" + new Date().getTime();
-        newUser.ID = Math.random().toString(36).substring(4);
-        newUser.UID = req.body.UID || Math.random().toString(36).substring(7);
-        newUser.PID = Math.random().toString(36).substring(10);
+        newUser.DBID = "dbid" + Math.floor((new Date()).getTime() / 1000);
+        newUser.ID = Math.random().toString(36).substring(6);
+        newUser.UID = req.body.UID || Math.random().toString(36).substring(10);
+        newUser.PID = Math.random().toString(36).substring(15);
 
-        authenticationModel.addNewUser(newUser, (err, rows) => {
+        // console.log(JSON.stringify(newUser));
+
+        authenticationModel.addNewUser(newUser, (err, result) => {
             if (!err) {
-                res.status(201).json(rows);
+                res.status(201).json(result);
+                // console.log('Attempting login')
+                // req.login({ UID: newUser.UID, PID: newUser.PID }, function (err) {
+                //     if (err) {
+                //         console.log(err);
+                //         res.status(500).send(err);
+                //     } else {
+                //         console.log('Login successful. Redirecting to dashboard.')
+                //         return res.redirect('/dashboard');
+                //     }
+                // });
+                
             } else {
                 res.status(500).send(err);
             }

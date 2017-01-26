@@ -28,7 +28,7 @@ let authenticationModel = () => {
             }
 
             /**
-            * Create insert statement add all keys/colummns onto query
+            * Create insert statement add all keys/columns onto query
             */
             let query = "INSERT INTO DBID (" + Object.keys(newUser).join(", ") + ") VALUES (";
 
@@ -44,17 +44,17 @@ let authenticationModel = () => {
 
             query += cleanedValues + ");";
 
-            console.log(query);
+            // console.log(query);
 
             /**
              * Insert new user in the db then return the err or result to the callback.
              */
-            connection.query(query, (err, rows) => {
+            connection.query(query, (err, result) => {
                 connection.release();
                 console.log("Connection released");
                 if (!err) {
-                    console.log("New user added to the DB");
-                    callback(null, rows);
+                    console.log("New user added to the DB.");
+                    callback(null, result);
                 } else {
                     console.log(err);
                     callback(err);
