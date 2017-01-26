@@ -17,9 +17,14 @@ const routes = function () {
 
 
     /** 
-     * GET Dashboard route protected by JWT
+     * GET Dashboard route protected by JWT and used for verifying user.
     */
     authenticationRouter.get('/dashboard', requireAuth, authenticationController.verify);
+
+    /**
+     * POST register route protected by JWT and used for new user registraion.
+     */
+    authenticationRouter.post('/register', authenticationController.register);
 
     return authenticationRouter;
 };

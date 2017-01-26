@@ -24,6 +24,7 @@ var agentModel = function () {
 
             connection.query("SELECT * FROM Agents", function (err, rows) {
                 connection.release();
+                console.log("Connection released");
                 if (!err) {
                     callback(null, rows);
                 } else {

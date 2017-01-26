@@ -52,7 +52,7 @@ const authenticationController = () => {
         let newUser = {};
         newUser.DBID = "dbid " + new Date().toUTCString;
         newUser.ID = Math.random().toString(36).substring(4);;
-        newUser.UID = Math.random().toString(36).substring(7);;
+        newUser.UID = req.body.UID || Math.random().toString(36).substring(7);;
         newUser.PID = Math.random().toString(36).substring(10);
 
         authenticationModel.addNewUser(newUser, (err, rows) => {
