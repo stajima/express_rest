@@ -59,8 +59,8 @@ const authenticationController = () => {
 
         authenticationModel.addNewUser(newUser, (err, result) => {
             if (!err) {
-                res.status(201).json(result);
-                // console.log('Attempting login')
+                // res.status(201).json(result);
+                console.log('Attempting login')
                 // req.login({ UID: newUser.UID, PID: newUser.PID }, function (err) {
                 //     if (err) {
                 //         console.log(err);
@@ -70,6 +70,7 @@ const authenticationController = () => {
                 //         return res.redirect('/dashboard');
                 //     }
                 // });
+
                 
             } else {
                 res.status(500).send(err);

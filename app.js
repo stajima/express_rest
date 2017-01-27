@@ -1,7 +1,11 @@
 const express = require('express');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
-// const passport =  require('passport');
+const passport =  require('passport');
+
+//included for later use
+const passportService = require('./config/passport');
+
 
 const app = express();
 
@@ -11,7 +15,7 @@ const app = express();
 app.use(logger('dev')); // Log requests to API using morgan
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-// app.use(passport.initialize());
+app.use(passport.initialize());
 
 
 /*
