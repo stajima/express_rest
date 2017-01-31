@@ -18,12 +18,17 @@ const bcrypt = require('bcrypt');
 //     });
 // });
 
-//set jwt authentication options
+/**
+ * Set jwt authentication options.
+ */
 const jwtOptions = {
     jwtFromRequest: ExtractJwt.fromAuthHeader(),
     secretOrKey: config.passport.key
 }
 
+/**
+ * Passport Strategy for JWT. Gets the user from the DB with matching UID and checks users JWT.
+ */
 passport.use(new JwtStrategy(jwtOptions, (payload, done) => {
     console.log("JwtStrategy Hit");
     getConnection((err, connection) => {
@@ -46,12 +51,18 @@ passport.use(new JwtStrategy(jwtOptions, (payload, done) => {
 
 }));
 
-//set alternative fields to use instead of passport defaults
+/**
+ * Set alternative fields to use instead of passport defaults.
+ */
 const localOptions = {
     usernameField: 'UID',
     passwordField: 'Password'
 }
 
+/**
+ * Passport Strategy for local. Gets user matching the UID from the DB and 
+ * then checks to see if the password matches to authenticate the user.
+ */
 passport.use(new LocalStrategy(localOptions, (UID, Password, done) => {
     getConnection((err, connection) => {
         //Query style to prevent SQL injection
@@ -79,7 +90,7 @@ passport.use(new LocalStrategy(localOptions, (UID, Password, done) => {
                     return done(null, false, { error: 'Incorrect password' });
                 }
             });
-            
+
             // console.log(rows[0]);
             return done(null, rows[0]);
         });
