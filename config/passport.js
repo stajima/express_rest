@@ -79,12 +79,7 @@ passport.use(new LocalStrategy(localOptions, (UID, Password, done) => {
                     return done(null, false, { error: 'Incorrect password' });
                 }
             });
-
-            // if (!(rows[0].PID === PID)) {
-            //     console.log('Incorrect password');
-            //     return done(null, false, { error: 'Incorrect password' });
-            // }
-
+            
             // console.log(rows[0]);
             return done(null, rows[0]);
         });
