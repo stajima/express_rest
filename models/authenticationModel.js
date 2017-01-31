@@ -50,7 +50,7 @@ let authenticationModel = () => {
              * Insert new user in the db then return the err or result to the callback.
              */
             connection.query(query, (err, result) => {
-                connection.release();
+                connection.release(); 
                 console.log("Connection released");
                 if (!err) {
                     console.log("New user added to the DB.");

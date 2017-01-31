@@ -2,6 +2,7 @@ const authenticationController = () => {
     const jwt = require('jsonwebtoken');
     const config = require('../config/config');
     const authenticationModel = require('../models/authenticationModel')();
+    const bcrypt = require('bcrypt');
 
     /**
      * Generates JWT using user info and config key. 
@@ -47,35 +48,73 @@ const authenticationController = () => {
      * Register a new user
      */
     let register = (req, res) => {
-
-        //Prep new user data
         let newUser = {};
-        newUser.DBID = "dbid" + Math.floor((new Date()).getTime() / 1000);
-        newUser.ID = Math.random().toString(36).substring(6);
-        newUser.UID = req.body.UID || Math.random().toString(36).substring(10);
-        newUser.PID = Math.random().toString(36).substring(15);
 
-        // console.log(JSON.stringify(newUser));
+        /**
+         * Generate random char string then calls addNewUser().
+         */
+        function makeid(length) {
+            var text = "";
+            var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-        authenticationModel.addNewUser(newUser, (err, result) => {
-            if (!err) {
-                // res.status(201).json(result);
-                console.log('Attempting login')
-                // req.login({ UID: newUser.UID, PID: newUser.PID }, function (err) {
-                //     if (err) {
-                //         console.log(err);
-                //         res.status(500).send(err);
-                //     } else {
-                //         console.log('Login successful. Redirecting to dashboard.')
-                //         return res.redirect('/dashboard');
-                //     }
-                // });
+            for (var i = 0; i < length; i++)
+                text += possible.charAt(Math.floor(Math.random() * possible.length));
 
-                
-            } else {
-                res.status(500).send(err);
-            }
-        });
+            return text;
+        }
+
+        /**
+         * Returns Bcrypt hash.
+         */
+        const saltRounds = 10;
+        let generateHash = (myPlaintextPassword) => {
+            // console.log('plain text pass: ' + myPlaintextPassword);
+            bcrypt.genSalt(saltRounds, function (err, salt) {
+                bcrypt.hash(myPlaintextPassword, salt, function (err, generatedHash) {
+                    // console.log('hash: ' + generatedHash);
+                    newUser.Hash = generatedHash;
+                    addNewUser();
+                });
+            });
+        }
+
+        /**
+         * Adds new user and returns based on err.
+         */
+        let addNewUser = () => {
+            console.log("User: " + JSON.stringify(newUser));
+            authenticationModel.addNewUser(newUser, (err, result) => {
+                if (!err) {
+                    //User add was successful
+                    res.status(201).json({
+                        success: true,
+                        message: 'New user has been added',
+                        user: {
+                            UID: newUser.UID,
+                            Password: password
+                        }
+                    });
+
+                } else {
+                    res.status(500).send(err);
+                }
+            });
+        }
+
+
+        /**
+         * Preps new user data. Calls generateHash() at the end.
+         */
+        const password = 'test' || req.body.Hash || makeid(15);
+        let createUserPayload = () => {
+            newUser.DBID = "dbid" + Math.floor((new Date()).getTime() / 1000);
+            newUser.ID = req.body.ID || makeid(6);
+            newUser.UID = req.body.UID || makeid(10);
+            generateHash(password);
+        }
+
+        createUserPayload();
+
     }
 
     return {

@@ -4,6 +4,7 @@ const ExtractJwt = require('passport-jwt').ExtractJwt;
 const LocalStrategy = require('passport-local').Strategy;
 const getConnection = require('../config/connection');
 const config = require('./config');
+const bcrypt = require('bcrypt');
 
 // passport.serializeUser((user, done) => {
 //     console.log('serializeUser');
@@ -48,11 +49,10 @@ passport.use(new JwtStrategy(jwtOptions, (payload, done) => {
 //set alternative fields to use instead of passport defaults
 const localOptions = {
     usernameField: 'UID',
-    passwordField: 'PID'
+    passwordField: 'Password'
 }
 
-passport.use(new LocalStrategy(localOptions, (UID, PID, done) => {
-
+passport.use(new LocalStrategy(localOptions, (UID, Password, done) => {
     getConnection((err, connection) => {
         //Query style to prevent SQL injection
         let query = 'SELECT * FROM DBID WHERE UID = ' + connection.escape(UID);
@@ -69,10 +69,21 @@ passport.use(new LocalStrategy(localOptions, (UID, PID, done) => {
                 return done(null, false, { error: 'No user found' });
             }
             //if user is found but password does not match return with msg
-            if (!(rows[0].PID === PID)) {
-                console.log('Incorrect password');
-                return done(null, false, { error: 'Incorrect password' });
-            }
+            bcrypt.compare(Password, rows[0].Hash, function (err, res) {
+                if (err) {
+                    console.log('bcrypt err while checking password');
+                    return done(null, false, { error: 'Incorrect password' });
+                }
+                if (res === false) {
+                    console.log('Incorrect password');
+                    return done(null, false, { error: 'Incorrect password' });
+                }
+            });
+
+            // if (!(rows[0].PID === PID)) {
+            //     console.log('Incorrect password');
+            //     return done(null, false, { error: 'Incorrect password' });
+            // }
 
             // console.log(rows[0]);
             return done(null, rows[0]);
