@@ -3,6 +3,8 @@ const authenticationController = () => {
     const config = require('../config/config');
     const authenticationModel = require('../models/authenticationModel')();
     const bcrypt = require('bcrypt');
+    const crypto = require('crypto');
+
 
 
     /**
@@ -105,13 +107,13 @@ const authenticationController = () => {
 
 
         /**
-         * Preps new user data. Calls generateHash() at the end.
+         * Preps new user data. Calls generateHash() at the end. Uses NodeJS Crypto to generate a unique random string
          */
-        const password = 'test' || req.body.Hash || makeid(15);
+        const password = 'test' || req.body.Hash || crypto.randomBytes(15).toString('hex');
         let createUserPayload = () => {
             newUser.DBID = "dbid" + Math.floor((new Date()).getTime() / 1000);
-            newUser.ID = req.body.ID || makeid(6);
-            newUser.UID = req.body.UID || makeid(10);
+            newUser.ID = req.body.ID || crypto.randomBytes(6).toString('hex');
+            newUser.UID = req.body.UID || crypto.randomBytes(10).toString('hex');
             generateHash(password);
         }
 
