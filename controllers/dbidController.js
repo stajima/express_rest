@@ -1,14 +1,14 @@
-var agentController = function () {
+var dbidController = function () {
 
-    var agentModel = require('../models/agentModel')();
+    var dbidModel = require('../models/dbidModel')();
 
     /**
-     * Function for when a get is called on the agents route.
-     * Simple SELECT from the Agents table.
+     * Function for when a get is called on the dbids route.
+     * Simple SELECT from the dbids table.
      * If succesful it returns the rows in json otherwise sends a 500 status code and the err msg.
      */
     var get = function (req, res) {
-        agentModel.getAllAgents(function (err, rows) {
+        dbidModel.getAlldbids(function (err, rows) {
             if (!err) {
                 res.status(201).json(rows);
             } else {
@@ -23,4 +23,4 @@ var agentController = function () {
 
 };
 
-module.exports = agentController;
+module.exports = dbidController;

@@ -1,4 +1,4 @@
-var agentModel = function () {
+var dbidModel = function () {
 
     /**
      * Get a connection from the mysql db pool.
@@ -6,9 +6,9 @@ var agentModel = function () {
     var getConnection = require('../config/connection');
 
     /**
-     * Gets all agents from Agents table
+     * Gets all dbids from dbids table
      */
-    var getAllAgents = function (callback) {
+    var getAlldbids = function (callback) {
 
         getConnection(function (err, connection) {
             if (err) {
@@ -22,7 +22,7 @@ var agentModel = function () {
                 });
             }
 
-            connection.query("SELECT * FROM Agents", function (err, rows) {
+            connection.query("SELECT * FROM DBID", function (err, rows) {
                 connection.release();
                 console.log("Connection released");
                 if (!err) {
@@ -35,9 +35,9 @@ var agentModel = function () {
     }
 
     return {
-        getAllAgents: getAllAgents
+        getAlldbids: getAlldbids
     }
 
 }
 
-module.exports = agentModel;
+module.exports = dbidModel;

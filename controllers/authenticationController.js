@@ -4,29 +4,44 @@ const authenticationController = () => {
     const authenticationModel = require('../models/authenticationModel')();
     const bcrypt = require('bcrypt');
 
-    /**
-     * Generates JWT using user info and config key. 
-     */
-    let generateToken = (userInfo) => {
-        return jwt.sign(userInfo, config.passport.key, { expiresIn: 10080 });
-    }
 
     /**
-     * Controls which info gets passed back and is used in JWT creation
+     * Generate random char string then calls addNewUser().
      */
-    let setUserInfo = (request) => {
-        return {
-            DBID: request.DBID,
-            UID: request.UID,
-            ID: request.ID,
-            EMAIL: request.Email
-        }
+    function makeid(length) {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for (var i = 0; i < length; i++)
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+        return text;
     }
 
     /**
      * Passes back JWT and user info if login is successful
      */
     let login = (req, res) => {
+
+        /**
+        * Generates JWT using user info and config key. 
+        */
+        let generateToken = (userInfo) => {
+            return jwt.sign(userInfo, config.passport.key, { expiresIn: 10080 });
+        }
+
+        /**
+        * Controls which info gets passed back and is used in JWT creation
+        */
+        let setUserInfo = (request) => {
+            return {
+                DBID: request.DBID,
+                UID: request.UID,
+                ID: request.ID,
+                EMAIL: request.Email
+            }
+        }
+
         console.log('Login successful. Returning JWT and User JSON');
         let userInfo = setUserInfo(req.user);
         res.status(201).json({
@@ -49,19 +64,6 @@ const authenticationController = () => {
      */
     let register = (req, res) => {
         let newUser = {};
-
-        /**
-         * Generate random char string then calls addNewUser().
-         */
-        function makeid(length) {
-            var text = "";
-            var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-            for (var i = 0; i < length; i++)
-                text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-            return text;
-        }
 
         /**
          * Returns Bcrypt hash.

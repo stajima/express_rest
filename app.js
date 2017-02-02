@@ -31,10 +31,10 @@ app.get('/', function (req, res) {
 });
 
 /*
- * Require and use the agentRouter if path requested is /api/Agents.
+ * Require and use the dbidRouter if path requested is /api/dbids.
  */
-const agentRouter = require('./routes/agentRoutes')();
-app.use('/api/agents', agentRouter);
+const dbidRouter = require('./routes/dbidRoutes')();
+app.use('/api/dbids', dbidRouter);
 
 /**
  * Route for /api/authentication
