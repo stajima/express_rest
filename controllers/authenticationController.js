@@ -13,8 +13,8 @@ const authenticationController = () => {
      * Generate random char string then calls addNewUser().
      */
     function makeid(length) {
-        var text = "";
-        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        var text = '';
+        var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
         for (var i = 0; i < length; i++)
             text += possible.charAt(Math.floor(Math.random() * possible.length));
@@ -70,25 +70,10 @@ const authenticationController = () => {
         let newUser = {};
 
         /**
-         * Returns Bcrypt hash.
-         */
-        const saltRounds = 10;
-        let generateHash = (myPlaintextPassword) => {
-            // console.log('plain text pass: ' + myPlaintextPassword);
-            bcrypt.genSalt(saltRounds, function (err, salt) {
-                bcrypt.hash(myPlaintextPassword, salt, function (err, generatedHash) {
-                    // console.log('hash: ' + generatedHash);
-                    newUser.Hash = generatedHash;
-                    addNewUser();
-                });
-            });
-        }
-
-        /**
          * Adds new user and returns based on err.
          */
         let addNewUser = () => {
-            console.log("User: " + JSON.stringify(newUser));
+            console.log('User: ' + JSON.stringify(newUser));
             authenticationModel.addNewUser(newUser, (err, result) => {
                 if (!err) {
                     //User add was successful
@@ -107,13 +92,28 @@ const authenticationController = () => {
             });
         }
 
+        /**
+         * Returns Bcrypt hash.
+         */
+        const saltRounds = 10;
+        let generateHash = (myPlaintextPassword) => {
+            // console.log('plain text pass: ' + myPlaintextPassword);
+            bcrypt.genSalt(saltRounds, function (err, salt) {
+                bcrypt.hash(myPlaintextPassword, salt, function (err, generatedHash) {
+                    // console.log('hash: ' + generatedHash);
+                    newUser.Hash = generatedHash;
+                    addNewUser();
+                });
+            });
+        }
+
 
         /**
          * Preps new user data. Calls generateHash() at the end. Uses NodeJS Crypto to generate a unique random string
          */
         const password = 'test' || req.body.Hash || crypto.randomBytes(15).toString('hex');
         let createUserPayload = () => {
-            newUser.DBID = "dbid" + Math.floor((new Date()).getTime() / 1000);
+            newUser.DBID = 'dbid' + Math.floor((new Date()).getTime() / 1000);
             newUser.ID = req.body.ID || crypto.randomBytes(6).toString('hex');
             newUser.UID = req.body.UID || crypto.randomBytes(10).toString('hex');
             generateHash(password);
@@ -130,17 +130,17 @@ const authenticationController = () => {
         let email;
         if (!req.body.data || !req.body.data.email) {
             // if no data or data does not contain the email return success false
-            res.status(400).json({ success: false, message: "An email address is required to request a password reset" });
+            res.status(400).json({ success: false, message: 'An email address is required to request a password reset' });
         } else {
             email = req.body.data.email;
-            console.log("Search for: " + email);
+            console.log('Search for: ' + email);
         }
 
         authenticationModel.findUserByEmail(email, (err, user) => {
             if (err) {
                 res.status(err.code).json({ success: false, message: err.message });
             } else {
-                console.log("User found. Email is: " + user.Email);
+                console.log('User found. Email is: ' + user.Email);
 
                 //generate reset_token and current moment
                 let reset_token = crypto.randomBytes(50).toString('hex');
@@ -201,7 +201,7 @@ const authenticationController = () => {
                         });
 
                         //make the user think an email has been sent out even if it doesnt exist for security reasons
-                        res.status(202).json({ success: true, message: "An email has been send with instructions to reset the password." });
+                        res.status(202).json({ success: true, message: 'An email has been send with instructions to reset the password.' });
                     }
                 });
             }
@@ -212,7 +212,7 @@ const authenticationController = () => {
      * Return password reset form
      */
     let passwordResetForm = () => {
-        
+
     }
 
     return {
