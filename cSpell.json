@@ -1,0 +1,48 @@
+// cSpell Settings
+{
+    // Version of the setting file.  Always 0.1
+    "version": "0.1",
+    // language - current active spelling language
+    "language": "en",
+    // words - list of words to be always considered correct
+    "words": [
+        "roundrect",
+        "xmlns",
+        "strokecolor",
+        "arcsize",
+        "fillcolor",
+        "anchorlock",
+        "DBID",
+        "smtp",
+        "gmail",
+        "shanetajima",
+        "dbids",
+        "camelcase"
+    ],
+    
+    // flagWords - list of words to be always considered incorrect
+    // This is useful for offensive words and common spelling errors.
+    // For example "hte" should be "the"
+    "flagWords": [
+        "hte"
+    ],
+    // Specify paths/files to ignore.
+    "cSpell.ignorePaths": [
+        "node_modules",
+        "**/node_modules",
+        "**/node_modules/**",
+        "node_modules/**",
+        "vscode-extension",
+        ".git",
+        "*.dll",
+        "**/*.dll"
+    ]
+}
+// this will ignore anything the node_modules directory
+// the same for this one
+// the same for this one
+// Doesn't currently work due to how the current working directory is determined.
+//
+// Ignore the .git directory
+// Ignore all .dll files.
+// Ignore all .dll files

@@ -36,7 +36,7 @@ const routes = function () {
     /**
      * GET reset_password route used to respond to incoming request from a users reset email link
      */
-    authenticationRouter.get('/reset_password', authenticationController.passwordResetForm);
+    authenticationRouter.get('/reset_password/:resetToken', authenticationController.sendResetForm);
 
     return authenticationRouter;
 };

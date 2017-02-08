@@ -24,7 +24,7 @@ let authenticationModel = () => {
                 connection.on('error', (err) => {
                     callback({ code: 500, status: "Error in connection database" });
                     return;
-                })
+                });
             }
 
             /**
@@ -62,7 +62,7 @@ let authenticationModel = () => {
             });
 
         });
-    }
+    };
 
     /**
      * Finds user in the DB using email.
@@ -76,14 +76,14 @@ let authenticationModel = () => {
              * error then do the same.
              */
             if (err) {
-                callback({ code: 500, messsage: "Error in connection database" });
+                callback({ code: 500, message: "Error in connection database" });
                 return;
             } else {
                 console.log("connected as id " + connection.threadId);
                 connection.on('error', (err) => {
                     callback({ code: 500, message: "Error in connection database" });
                     return;
-                })
+                });
             }
 
             let query = "SELECT * FROM DBID WHERE Email = " + connection.escape(email);
@@ -99,10 +99,10 @@ let authenticationModel = () => {
             });
         });
 
-    }
+    };
 
     /**
-     * Adds resetToken and resetDate to the user in the DB using email. Returns true if sucessful.
+     * Adds resetToken and resetDate to the user in the DB using email. Returns true if successful.
      */
     let addResetFields = (userEmail, resetToken, resetDate, callback) => {
 
@@ -122,7 +122,7 @@ let authenticationModel = () => {
                 connection.on('error', (err) => {
                     callback({ code: 500, message: "Error in connection database" });
                     return;
-                })
+                });
             }
 
             let query = "UPDATE DBID SET Reset_token = '" + resetToken + "', Reset_request_date = '" + resetDate + "' WHERE Email = '" + userEmail + "';";
@@ -138,14 +138,59 @@ let authenticationModel = () => {
             });
         });
 
-    }
+    };
+
+    /**
+     * Find the user that has the Reset_token
+     */
+    let getUserWithToken = (token, callback) => {
+        console.log('Attempting to find reset_token: ' + token);
+        getConnection((err, connection) => {
+            /**
+             * If there's an error while getting a connection then pass back 
+             * a status of 500 and with an error message. If at any time there is a DB connection 
+             * error then do the same.
+             */
+            if (err) {
+                console.log(err);
+                callback({ code: 500, status: "Error in connection database", err: err });
+                return;
+            } else {
+                console.log("connected as id " + connection.threadId);
+                connection.on('error', (err) => {
+                    callback({ code: 500, message: "Error in connection database", err: err });
+                    return;
+                });
+            }
+
+            let query = 'SELECT * FROM DBID WHERE Reset_token = ' + connection.escape(token) + ';';
+            console.log(query);
+            connection.query(query, (err, rows) => {
+                connection.release();
+                if (err && err.errno === 1065) {
+                    //Catch ER_EMPTY_QUERY error
+                    console.log('ER_EMPTY_QUERY');
+                    callback(null, []);
+                } else if (err) {
+                    //Any other DB err
+                    console.log(err);
+                    callback({ code: 500, message: "Error in connection database", err: err });
+                } else {
+                    //No errors. Row found.
+                    callback(null, rows);
+                }
+            });
+
+        });
+    };
 
     return {
         addNewUser: addNewUser,
         findUserByEmail: findUserByEmail,
-        addResetFields: addResetFields
-    }
-}
+        addResetFields: addResetFields,
+        getUserWithToken: getUserWithToken
+    };
+};
 
 module.exports = authenticationModel;
 
