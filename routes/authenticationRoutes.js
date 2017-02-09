@@ -29,14 +29,19 @@ const routes = function () {
     authenticationRouter.post('/register', authenticationController.register);
 
     /**
-     * POST reset_password route used to start reset password process
+     * POST request_password_reset route used to start reset password process
      */
-    authenticationRouter.post('/reset_password', authenticationController.sendResetEmail);
+    authenticationRouter.post('/request_password_reset', authenticationController.sendResetEmail);
 
     /**
      * GET reset_password route used to respond to incoming request from a users reset email link
      */
     authenticationRouter.get('/reset_password/:resetToken', authenticationController.sendResetForm);
+
+    /**
+     * Handle submission of reset password form
+     */
+    authenticationRouter.post('/reset_password/:resetToken', authenticationController.changeUsersPassword);
 
     return authenticationRouter;
 };

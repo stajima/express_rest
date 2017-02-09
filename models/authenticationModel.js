@@ -184,11 +184,50 @@ let authenticationModel = () => {
         });
     };
 
+    /**
+     * Changes users PID with new PID
+     */
+    let updatePID = (newPID, resetToken, callback) => {
+
+        getConnection((err, connection) => {
+            /**
+             * If there's an error while getting a connection then pass back 
+             * a status of 500 and with an error message. If at any time there is a DB connection 
+             * error then do the same.
+             */
+            if (err) {
+                console.log(err);
+                callback({ code: 500, status: "Error in connection database", err: err });
+                return;
+            } else {
+                console.log("connected as id " + connection.threadId);
+                connection.on('error', (err) => {
+                    callback({ code: 500, message: "Error in connection database", err: err });
+                    return;
+                });
+            }
+
+            //Change Hash to new password hash and remove reset_token
+            let query = 'UPDATE DBID SET PID = ' + connection.escape(newPID) + ', Reset_token = NULL ' + 'WHERE Reset_token = ' + connection.escape(resetToken) + ';';
+            console.log(query);
+            connection.query(query, (err, result) => {
+                if (err) {
+                    callback({ code: 500, err: err, message: 'Failed to reset the password' });
+                } else {
+                    callback(null, result);
+                }
+            });
+
+        });
+
+    };
+
     return {
         addNewUser: addNewUser,
         findUserByUID: findUserByUID,
         addResetFields: addResetFields,
-        getUserWithToken: getUserWithToken
+        getUserWithToken: getUserWithToken,
+        updatePID: updatePID
     };
 };
 

@@ -12,8 +12,8 @@ const app = express();
  * Middleware 
  */
 app.use(logger('dev')); // Log requests to API using morgan
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true })); //support parsing of application/x-www-form-urlencoded post data
+app.use(bodyParser.json()); //support parsing of application/json type post data
 app.use(passport.initialize());
 /*
  * Use Gulp set port. Use port 3000 as backup.
