@@ -128,27 +128,27 @@ const authenticationController = () => {
      * Send user reset email with a unique token assigned to their account if they are in the DB.
      */
     let sendResetEmail = (req, res) => {
-        let email;
-        if (!req.body.data || !req.body.data.email) {
+        let UID;
+        if (!req.body.data || !req.body.data.UID) {
             // if no data or data does not contain the email return success false
-            res.status(400).json({ success: false, message: 'An email address is required to request a password reset' });
+            res.status(400).json({ success: false, message: 'An User ID is required to request a password reset' });
         } else {
-            email = req.body.data.email;
-            console.log('Search for: ' + email);
+            UID = req.body.data.UID;
+            console.log('Search for: ' + UID);
         }
 
-        authenticationModel.findUserByEmail(email, (err, user) => {
+        authenticationModel.findUserByUID(UID, (err, user) => {
             if (err) {
                 res.status(err.code).json({ success: false, message: err.message });
             } else {
-                console.log('User found. Email is: ' + user.Email);
+                console.log('User found. UID is: ' + user.UID);
 
                 //generate 50 character resetToken and current moment
                 let resetToken = crypto.randomBytes(64).toString('hex').slice(0, 50);
                 var now = moment().format();
 
                 //TODO store resetToken and reset_request_date in users row
-                authenticationModel.addResetFields(user.Email, resetToken, now, (err, success) => {
+                authenticationModel.addResetFields(user.UID, resetToken, now, (err, success) => {
                     if (err) {
                         res.status(err.code).json({ success: false, message: err.message });
                     } else {

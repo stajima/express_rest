@@ -67,7 +67,7 @@ let authenticationModel = () => {
     /**
      * Finds user in the DB using email.
      */
-    let findUserByEmail = (email, callback) => {
+    let findUserByUID = (UID, callback) => {
 
         getConnection((err, connection) => {
             /**
@@ -86,7 +86,7 @@ let authenticationModel = () => {
                 });
             }
 
-            let query = "SELECT * FROM DBID WHERE Email = " + connection.escape(email);
+            let query = "SELECT * FROM DBID WHERE UID = " + connection.escape(UID);
             connection.query(query, (err, rows) => {
                 connection.release();
                 console.log("Connection released");
@@ -104,7 +104,7 @@ let authenticationModel = () => {
     /**
      * Adds resetToken and resetDate to the user in the DB using email. Returns true if successful.
      */
-    let addResetFields = (userEmail, resetToken, resetDate, callback) => {
+    let addResetFields = (UID, resetToken, resetDate, callback) => {
 
         getConnection((err, connection) => {
 
@@ -125,7 +125,7 @@ let authenticationModel = () => {
                 });
             }
 
-            let query = "UPDATE DBID SET Reset_token = '" + resetToken + "', Reset_request_date = '" + resetDate + "' WHERE Email = '" + userEmail + "';";
+            let query = "UPDATE DBID SET Reset_token = '" + resetToken + "', Reset_request_date = '" + resetDate + "' WHERE UID = '" + UID + "';";
             console.log(query);
             connection.query(query, (err, rows) => {
                 connection.release();
@@ -186,7 +186,7 @@ let authenticationModel = () => {
 
     return {
         addNewUser: addNewUser,
-        findUserByEmail: findUserByEmail,
+        findUserByUID: findUserByUID,
         addResetFields: addResetFields,
         getUserWithToken: getUserWithToken
     };
