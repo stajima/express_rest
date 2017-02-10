@@ -85,12 +85,12 @@ const authenticationController = () => {
         let newUser = {};
         //Using test for default password during dev
         //If a password is not set by user one a 15char one is generated.
-        const plainTextPassword = 'test' || req.body.password1 || crypto.randomBytes(46).toString('hex').substring(0,15);
+        const plainTextPassword = 'test' || req.body.password1 || crypto.randomBytes(46).toString('hex').substring(0, 15);
 
         //Preps new user data. Calls generateHash() at the end. Uses NodeJS Crypto to generate a unique random string
         newUser.DBID = 'dbid' + Math.floor((new Date()).getTime() / 1000);
-        newUser.ID = req.body.ID || crypto.randomBytes(64).toString('hex').substring(0,6);
-        newUser.UID = req.body.UID || crypto.randomBytes(64).toString('hex').substring(0,10);
+        newUser.ID = req.body.ID || crypto.randomBytes(64).toString('hex').substring(0, 6);
+        newUser.UID = req.body.UID || crypto.randomBytes(64).toString('hex').substring(0, 10);
 
         /**
          * Get a hash and then add new user and returns based on err.
@@ -121,7 +121,48 @@ const authenticationController = () => {
     };
 
     /**
-     * Send user reset email with a unique token assigned to their account if they are in the DB.
+     * Sends emails related to password reset
+     */
+    let sendEmail = (emailType, to, emailSubject, htmlBody, callback) => {
+
+        //single connection SMTP options
+        let smtpConfig = {
+            host: config.mail.host,
+            port: config.mail.port,
+            secure: config.mail.secure,
+            auth: {
+                //Takes string emailType which determines which mail config user/pass is pulled in
+                user: config.mail[emailType].user,
+                pass: config.mail[emailType].pass
+            }
+        };
+
+        // create reusable transporter object using the default SMTP transport
+        let transporter = nodemailer.createTransport(smtpConfig);
+
+        // setup email data with unicode symbols
+        let mailOptions = {
+            from: config.mail[emailType].from, // sender address
+            to: to, // list of receivers comma delimited
+            replyTo: config.mail[emailType].replyTo,
+            subject: emailSubject, // Subject line
+            // text: 'Blah blah blah', // plain text body
+            html: htmlBody // html body
+        };
+
+        // send mail with defined transport object
+        transporter.sendMail(mailOptions, (err, info) => {
+            if (err) {
+                callback(err);
+            } else {
+                callback(null, info);
+            }
+        });
+
+    };
+
+    /**
+     * Handle user request for a reset email and create a unique token assigned to their account if they are in the DB.
      */
     let sendResetEmail = (req, res) => {
         let UID;
@@ -156,38 +197,14 @@ const authenticationController = () => {
                             let resetBtn = '<div><!--[if mso]> <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="http://" style="height:40px;v-text-anchor:middle;width:200px;" arcsize="10%" strokecolor="#1e3650" fillcolor="#ff8a0f"> <w:anchorlock/> <center style="color:#ffffff;font-family:sans-serif;font-size:13px;font-weight:bold;">RESET MY PASSWORD</center> </v:roundrect> <![endif]--><a href="' + resetLink + '" style="background-color:#ff8a0f;border:1px solid #1e3650;border-radius:4px;color:#ffffff;display:inline-block;font-family:sans-serif;font-size:13px;font-weight:bold;line-height:40px;text-align:center;text-decoration:none;width:200px;-webkit-text-size-adjust:none;mso-hide:all;">RESET MY PASSWORD</a></div>';
 
                             htmlBody += '<p>You recently requested a password reset on your REALTORS Association of Maui IDX administrative account.</p>' + resetBtn +
-                                '<p>If you did not request a password reset, please ignore this email or reply to let us know. This password reset is only valid for the next 10 minutes.</p>' +
+                                '<p>If you did not request a password reset, please ignore this email. This password reset is only valid for the next 10 minutes.</p>' +
                                 '<p>Aloha,</p><p>The REALTORS Association of Maui team</p>';
 
                             //Footer
                             htmlBody += '<hr><p>If you are having trouble clicking the password reset button, copy and paste the URL below into your web browser.</p>' +
                                 '<p><a href="' + resetLink + '">' + resetLink + '</a></p>';
 
-                            //single connection SMTP options
-                            let smtpConfig = {
-                                host: config.mail.host,
-                                port: config.mail.port,
-                                secure: config.mail.secure,
-                                auth: {
-                                    user: config.mail.reset.user,
-                                    pass: config.mail.reset.pass
-                                }
-                            };
-
-                            // create reusable transporter object using the default SMTP transport
-                            let transporter = nodemailer.createTransport(smtpConfig);
-
-                            // setup email data with unicode symbols
-                            let mailOptions = {
-                                from: config.mail.reset.from, // sender address
-                                to: 'shanetajima@gmail.com', // list of receivers comma delimited
-                                subject: 'RAM IDX Password Reset', // Subject line
-                                // text: 'Blah blah blah', // plain text body
-                                html: htmlBody // html body
-                            };
-
-                            // send mail with defined transport object
-                            transporter.sendMail(mailOptions, (err, info) => {
+                            sendEmail('reset', 'shanetajima@gmail.com', 'RAM IDX Password Reset Request', htmlBody, (err, info) => {
                                 if (err) {
                                     console.log(err);
                                 } else {
@@ -219,7 +236,6 @@ const authenticationController = () => {
         }
     };
 
-
     /**
      * Return password reset form if resetToken is valid and unexpired
      */
@@ -245,7 +261,7 @@ const authenticationController = () => {
             } else {
                 //No users found
                 //TODO return error to reset form
-                res.status(404).send('Could not find the account');
+                res.status(404).send('This link is not valid.');
             }
         });
 
@@ -255,6 +271,7 @@ const authenticationController = () => {
      * Handle reset password form submission
      */
     let passwordFormSubmit = (req, res) => {
+        let user;
 
         /**
          * Change the users password
@@ -267,8 +284,19 @@ const authenticationController = () => {
                         res.status(err.code).json(err);
                         return;
                     } else {
-                        res.status(200).json({ success: true, code: 200, message: 'User Password has been changed' });
-                        return;
+                        let htmlBody = '<h1>Hi ' + user.DBID + ',</h1>';
+
+                        htmlBody += '<p>This email is to confirm the password change on your REALTORS Association of Maui IDX administrative account.</p>' +
+                            '<p>Aloha,</p><p>The REALTORS Association of Maui team</p>';
+                        sendEmail('reset', 'shanetajima@gmail.com', 'RAM IDX Password Reset Confirmation', htmlBody, (err, info) => {
+                            if (err) {
+                                res.status(500).json({ success: true, code: 500, message: 'User Password has been changed but there was an error while sending the confirmation email.' });
+                                return;
+                            } else {
+                                res.status(200).json({ success: true, code: 200, message: 'User Password has been changed and a confirmation email has been sent.' });
+                                return;
+                            }
+                        });
                     }
                 });
             });
@@ -293,7 +321,7 @@ const authenticationController = () => {
                 return;
             }
 
-            let user = rows[0];
+            user = rows[0];
             /*jshint camelcase: false */
             if (isTokenValid(user.Reset_request_date)) {
                 changeUserPassword();
