@@ -65,16 +65,38 @@ const authenticationController = () => {
     };
 
     /**
+     * Calls callback with hash when Bcrypt hash generation is done.
+     */
+    const saltRounds = 10;
+    let generateHash = (myPlaintextPassword, callback) => {
+        // console.log('plain text pass: ' + myPlaintextPassword);
+        bcrypt.genSalt(saltRounds, function (err, salt) {
+            bcrypt.hash(myPlaintextPassword, salt, function (err, generatedHash) {
+                // console.log('hash: ' + generatedHash);
+                callback(generatedHash);
+            });
+        });
+    };
+
+    /**
      * Register a new user
      */
     let register = (req, res) => {
+        let newUser = {};
+        //Using test for default password during dev
+        //If a password is not set by user one a 15char one is generated.
+        const plainTextPassword = 'test' || req.body.password1 || crypto.randomBytes(46).toString('hex').substring(0,15);
+
+        //Preps new user data. Calls generateHash() at the end. Uses NodeJS Crypto to generate a unique random string
+        newUser.DBID = 'dbid' + Math.floor((new Date()).getTime() / 1000);
+        newUser.ID = req.body.ID || crypto.randomBytes(64).toString('hex').substring(0,6);
+        newUser.UID = req.body.UID || crypto.randomBytes(64).toString('hex').substring(0,10);
 
         /**
-         * Adds new user and returns based on err.
+         * Get a hash and then add new user and returns based on err.
          */
-        let newUser = {};
-        const password = 'test' || req.body.Hash || crypto.randomBytes(15).toString('hex');
-        let addNewUser = () => {
+        generateHash(plainTextPassword, (generatedHash) => {
+            newUser.Hash = generatedHash;
             console.log('User: ' + JSON.stringify(newUser));
             authenticationModel.addNewUser(newUser, (err, result) => {
                 if (!err) {
@@ -82,9 +104,11 @@ const authenticationController = () => {
                     res.status(201).json({
                         success: true,
                         message: 'New user has been added',
-                        user: {
-                            UID: newUser.UID,
-                            Password: password
+                        data: {
+                            user: {
+                                UID: newUser.UID,
+                                Password: plainTextPassword
+                            }
                         }
                     });
 
@@ -92,35 +116,7 @@ const authenticationController = () => {
                     res.status(500).send(err);
                 }
             });
-        };
-
-        /**
-         * Returns Bcrypt hash.
-         */
-        const saltRounds = 10;
-        let generateHash = (myPlaintextPassword) => {
-            // console.log('plain text pass: ' + myPlaintextPassword);
-            bcrypt.genSalt(saltRounds, function (err, salt) {
-                bcrypt.hash(myPlaintextPassword, salt, function (err, generatedHash) {
-                    // console.log('hash: ' + generatedHash);
-                    newUser.Hash = generatedHash;
-                    addNewUser();
-                });
-            });
-        };
-
-
-        /**
-         * Preps new user data. Calls generateHash() at the end. Uses NodeJS Crypto to generate a unique random string
-         */
-        let createUserPayload = () => {
-            newUser.DBID = 'dbid' + Math.floor((new Date()).getTime() / 1000);
-            newUser.ID = req.body.ID || crypto.randomBytes(6).toString('hex');
-            newUser.UID = req.body.UID || crypto.randomBytes(10).toString('hex');
-            generateHash(password);
-        };
-
-        createUserPayload();
+        });
 
     };
 
@@ -210,7 +206,7 @@ const authenticationController = () => {
     };
 
     /**
-     * Check to see if the token has not expired and return the reset form
+     * Check to see if the token has not expired. Returns boolean.
      */
     let isTokenValid = (resetRequestDate) => {
         let expiration = moment().subtract(10, 'minute').format();
@@ -256,23 +252,57 @@ const authenticationController = () => {
     };
 
     /**
-     * Change users password
+     * Handle reset password form submission
      */
-    let changeUsersPassword = (req, res) => {
+    let passwordFormSubmit = (req, res) => {
+
+        /**
+         * Change the users password
+         */
+        let changeUserPassword = () => {
+            generateHash(req.body.password1, (generatedHash) => {
+                authenticationModel.updateHash(generatedHash, req.params.resetToken, (err, result) => {
+                    if (err) {
+                        err.success = false;
+                        res.status(err.code).json(err);
+                        return;
+                    } else {
+                        res.status(200).json({ success: true, code: 200, message: 'User Password has been changed' });
+                        return;
+                    }
+                });
+            });
+        };
+
         if (!req.body.password1 || !req.body.password2) {
             res.status(400).json({ success: false, message: 'Both password fields must be filled' });
+            return;
         } else if (req.body.password1 !== req.body.password2) {
             res.status(400).json({ success: false, message: 'Password fields must match' });
-        } else {
-            authenticationModel.updatePID(req.body.password1, req.params.resetToken, (err, result) => {
-                if (err) {
-                    err.success = false;
-                    res.status(err.code).json(err);
-                } else {
-                    res.status(200).json({ success: true, code:200, message: 'User Password has been changed' });
-                }
-            });
+            return;
         }
+
+        //Check to see if user reset_token is unexpired
+        authenticationModel.getUserWithToken(req.params.resetToken, (err, rows) => {
+            if (err) {
+                err.success = false;
+                res.status(err.code).json(err);
+                return;
+            } else if (rows.length === 0) {
+                res.status(500).json({ success: false, code: 500, message: 'Could not find user' });
+                return;
+            }
+
+            let user = rows[0];
+            /*jshint camelcase: false */
+            if (isTokenValid(user.Reset_request_date)) {
+                changeUserPassword();
+            } else {
+                res.status(401).json({ success: false, code: 401, message: 'Reset time has expired.' });
+                return;
+            }
+
+        });
 
     };
 
@@ -282,7 +312,7 @@ const authenticationController = () => {
         register: register,
         sendResetEmail: sendResetEmail,
         sendResetForm: sendResetForm,
-        changeUsersPassword: changeUsersPassword
+        passwordFormSubmit: passwordFormSubmit
     };
 };
 

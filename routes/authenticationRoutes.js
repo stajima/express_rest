@@ -17,7 +17,6 @@ const routes = function () {
     */
     authenticationRouter.post('/login', requireLogin, authenticationController.login);
 
-
     /** 
      * GET Dashboard route protected by JWT and used for verifying user.
     */
@@ -41,7 +40,7 @@ const routes = function () {
     /**
      * Handle submission of reset password form
      */
-    authenticationRouter.post('/reset_password/:resetToken', authenticationController.changeUsersPassword);
+    authenticationRouter.post('/reset_password/:resetToken', authenticationController.passwordFormSubmit);
 
     return authenticationRouter;
 };

@@ -185,9 +185,9 @@ let authenticationModel = () => {
     };
 
     /**
-     * Changes users PID with new PID
+     * Changes users Hash with new Hash
      */
-    let updatePID = (newPID, resetToken, callback) => {
+    let updateHash = (newHash, resetToken, callback) => {
 
         getConnection((err, connection) => {
             /**
@@ -208,7 +208,7 @@ let authenticationModel = () => {
             }
 
             //Change Hash to new password hash and remove reset_token
-            let query = 'UPDATE DBID SET PID = ' + connection.escape(newPID) + ', Reset_token = NULL ' + 'WHERE Reset_token = ' + connection.escape(resetToken) + ';';
+            let query = 'UPDATE DBID SET Hash = ' + connection.escape(newHash) + ', Reset_token = NULL ' + 'WHERE Reset_token = ' + connection.escape(resetToken) + ';';
             console.log(query);
             connection.query(query, (err, result) => {
                 if (err) {
@@ -227,7 +227,7 @@ let authenticationModel = () => {
         findUserByUID: findUserByUID,
         addResetFields: addResetFields,
         getUserWithToken: getUserWithToken,
-        updatePID: updatePID
+        updateHash: updateHash
     };
 };
 
