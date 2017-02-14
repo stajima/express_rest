@@ -164,8 +164,15 @@ const authenticationController = () => {
             authenticationModel.findUserByUID(UID, (err, user) => {
                 if (err) {
                     res.status(err.code).json({success: false, message: err.message});
+                } else if (!user) {
+                    //make the user think an email has been sent out even if it doesn't exist for security reasons
+                    console.log('No user found');
+                    res.status(202).json({
+                        success: true,
+                        message: 'An email has been send with instructions to reset the password.'
+                    });
                 } else {
-                    console.log('User found. UID is: ' + user.UID);
+                    console.log('User found');
 
                     //generate 50 character resetToken and current moment
                     let resetToken = crypto.randomBytes(64).toString('hex').slice(0, 50);
@@ -201,7 +208,6 @@ const authenticationController = () => {
                                 }
                             });
 
-                            //make the user think an email has been sent out even if it doesn't exist for security reasons
                             res.status(202).json({
                                 success: true,
                                 message: 'An email has been send with instructions to reset the password.'

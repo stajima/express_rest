@@ -224,15 +224,16 @@ let authenticationModel = () => {
                 });
             }
 
-            let query = "UPDATE DBID SET Reset_token = '" + resetToken + "', Reset_request_date = '" + resetDate + "' WHERE UID = '" + UID + "';";
+            let query = "UPDATE Authentication SET Reset_token = '" + resetToken + "', Reset_request_date = '" + resetDate + "' WHERE UID = '" + UID + "';";
             console.log(query);
             connection.query(query, (err, rows) => {
                 connection.release();
+                console.log("Connection released");
                 if (err) {
                     console.log(err);
                     callback({code: 500, message: "Error in connection database"});
                 } else {
-                    console.log(rows);
+                    // console.log(rows);
                     callback(null, true);
                 }
             });
@@ -262,10 +263,11 @@ let authenticationModel = () => {
                 });
             }
 
-            let query = 'SELECT * FROM DBID WHERE Reset_token = ' + connection.escape(token) + ';';
+            let query = 'SELECT * FROM Authentication WHERE Reset_token = ' + connection.escape(token) + ';';
             console.log(query);
             connection.query(query, (err, rows) => {
                 connection.release();
+                console.log("Connection released");
                 if (err && err.errno === 1065) {
                     //Catch ER_EMPTY_QUERY error
                     console.log('ER_EMPTY_QUERY');
@@ -306,7 +308,7 @@ let authenticationModel = () => {
             }
 
             //Change Hash to new password hash and remove reset_token
-            let query = 'UPDATE DBID SET Hash = ' + connection.escape(newHash) + ', Reset_token = NULL ' + 'WHERE Reset_token = ' + connection.escape(resetToken) + ';';
+            let query = 'UPDATE Authentication SET Hash = ' + connection.escape(newHash) + ', Reset_token = NULL ' + 'WHERE Reset_token = ' + connection.escape(resetToken) + ';';
             console.log(query);
             connection.query(query, (err, result) => {
                 if (err) {
