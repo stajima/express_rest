@@ -18,11 +18,8 @@
       "allowRegex": true
     },
     "validateIndentation": 4,
-    "validateQuoteMarks": "'",
-
     "disallowMultipleLineStrings": true,
     "disallowMixedSpacesAndTabs": true,
-    "disallowTrailingWhitespace": true,
     "disallowSpaceAfterPrefixUnaryOperators": true,
     "disallowMultipleVarDecl": null,
 

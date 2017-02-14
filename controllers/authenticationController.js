@@ -9,29 +9,13 @@ const authenticationController = () => {
     const path = require('path');
 
     /**
-     * Generate random char string
-     *
-    function makeId(length) {
-        var text = '';
-        var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-        for (var i = 0; i < length; i++) {
-            text += possible.charAt(Math.floor(Math.random() * possible.length));
-        }
-        
-        return text;
-    }
-    */
-
-    /**
-    * Controls which info gets passed back and is used in JWT creation
-    */
+     * Controls which info gets passed back and is used in JWT creation
+     */
     let setUserInfo = (request) => {
         return {
             DBID: request.DBID,
             UID: request.UID,
-            ID: request.ID,
-            EMAIL: request.Email
+            EMAIL: request.Email1
         };
     };
 
@@ -41,10 +25,10 @@ const authenticationController = () => {
     let login = (req, res) => {
 
         /**
-        * Generates JWT using user info and config key. 
-        */
+         * Generates JWT using user info and config key.
+         */
         let generateToken = (userInfo) => {
-            return jwt.sign(userInfo, config.passport.key, { expiresIn: 10080 });
+            return jwt.sign(userInfo, config.passport.key, {expiresIn: 10080});
         };
 
         console.log('Login successful. Returning JWT and User JSON');
@@ -85,21 +69,27 @@ const authenticationController = () => {
         let newUser = {};
         //Using test for default password during dev
         //If a password is not set by user one a 15char one is generated.
-        const plainTextPassword = 'test' || req.body.password1 || crypto.randomBytes(46).toString('hex').substring(0, 15);
+        const plainTextPassword = 'test' || req.body['password1'] || crypto.randomBytes(46).toString('hex').substring(0, 15);
 
         //Preps new user data. Calls generateHash() at the end. Uses NodeJS Crypto to generate a unique random string
         newUser.DBID = 'dbid' + Math.floor((new Date()).getTime() / 1000);
-        newUser.ID = req.body.ID || crypto.randomBytes(64).toString('hex').substring(0, 6);
-        newUser.UID = req.body.UID || crypto.randomBytes(64).toString('hex').substring(0, 10);
+        newUser.ID = req.body['ID'] || crypto.randomBytes(64).toString('hex').substring(0, 6);
+        newUser.UID = req.body['UID'] || crypto.randomBytes(64).toString('hex').substring(0, 10);
+        newUser.AgentID = req.body['UID'] || crypto.randomBytes(64).toString('hex').substring(0, 10); //in the agents table AgentID is the same as UID in DBID & Auth
+        newUser.FirstName = 'John';
+        newUser.LastName = 'Doe';
+        newUser.Email1 = 'test@email.com';
+        //TODO grab all form inputs
 
         /**
          * Get a hash and then add new user and returns based on err.
          */
         generateHash(plainTextPassword, (generatedHash) => {
             newUser.Hash = generatedHash;
-            console.log('User: ' + JSON.stringify(newUser));
+            // console.log('User: ' + JSON.stringify(newUser));
             authenticationModel.addNewUser(newUser, (err, result) => {
                 if (!err) {
+                    console.log(result);
                     //User add was successful
                     res.status(201).json({
                         success: true,
@@ -168,13 +158,13 @@ const authenticationController = () => {
         let UID;
         if (!req.body.data || !req.body.data.UID) {
             // if no data or data does not contain the email return success false
-            res.status(400).json({ success: false, message: 'An User ID is required to request a password reset' });
+            res.status(400).json({success: false, message: 'An User ID is required to request a password reset'});
         } else {
             UID = req.body.data.UID;
             console.log('Search for: ' + UID);
             authenticationModel.findUserByUID(UID, (err, user) => {
                 if (err) {
-                    res.status(err.code).json({ success: false, message: err.message });
+                    res.status(err.code).json({success: false, message: err.message});
                 } else {
                     console.log('User found. UID is: ' + user.UID);
 
@@ -185,7 +175,7 @@ const authenticationController = () => {
                     //TODO store resetToken and reset_request_date in users row
                     authenticationModel.addResetFields(user.UID, resetToken, now, (err, success) => {
                         if (err) {
-                            res.status(err.code).json({ success: false, message: err.message });
+                            res.status(err.code).json({success: false, message: err.message});
                         } else {
                             //Generate email HTML and text
                             let resetLink = 'http://www.' + config.domain + '/api/auth/reset_password/' + resetToken;
@@ -193,7 +183,7 @@ const authenticationController = () => {
                             //Email header
                             let htmlBody = '<h1>Hi ' + user.DBID + ',</h1>';
 
-                            //Button to reset user password 
+                            //Button to reset user password
                             let resetBtn = '<div><!--[if mso]> <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="http://" style="height:40px;v-text-anchor:middle;width:200px;" arcsize="10%" strokecolor="#1e3650" fillcolor="#ff8a0f"> <w:anchorlock/> <center style="color:#ffffff;font-family:sans-serif;font-size:13px;font-weight:bold;">RESET MY PASSWORD</center> </v:roundrect> <![endif]--><a href="' + resetLink + '" style="background-color:#ff8a0f;border:1px solid #1e3650;border-radius:4px;color:#ffffff;display:inline-block;font-family:sans-serif;font-size:13px;font-weight:bold;line-height:40px;text-align:center;text-decoration:none;width:200px;-webkit-text-size-adjust:none;mso-hide:all;">RESET MY PASSWORD</a></div>';
 
                             htmlBody += '<p>You recently requested a password reset on your REALTORS Association of Maui IDX administrative account.</p>' + resetBtn +
@@ -213,7 +203,10 @@ const authenticationController = () => {
                             });
 
                             //make the user think an email has been sent out even if it doesn't exist for security reasons
-                            res.status(202).json({ success: true, message: 'An email has been send with instructions to reset the password.' });
+                            res.status(202).json({
+                                success: true,
+                                message: 'An email has been send with instructions to reset the password.'
+                            });
                         }
                     });
                 }
@@ -290,10 +283,18 @@ const authenticationController = () => {
                             '<p>Aloha,</p><p>The REALTORS Association of Maui team</p>';
                         sendEmail('reset', 'shanetajima@gmail.com', 'RAM IDX Password Reset Confirmation', htmlBody, (err, info) => {
                             if (err) {
-                                res.status(500).json({ success: true, code: 500, message: 'User Password has been changed but there was an error while sending the confirmation email.' });
+                                res.status(500).json({
+                                    success: true,
+                                    code: 500,
+                                    message: 'User Password has been changed but there was an error while sending the confirmation email.'
+                                });
                                 return;
                             } else {
-                                res.status(200).json({ success: true, code: 200, message: 'User Password has been changed and a confirmation email has been sent.' });
+                                res.status(200).json({
+                                    success: true,
+                                    code: 200,
+                                    message: 'User Password has been changed and a confirmation email has been sent.'
+                                });
                                 return;
                             }
                         });
@@ -303,10 +304,10 @@ const authenticationController = () => {
         };
 
         if (!req.body.password1 || !req.body.password2) {
-            res.status(400).json({ success: false, message: 'Both password fields must be filled' });
+            res.status(400).json({success: false, message: 'Both password fields must be filled'});
             return;
         } else if (req.body.password1 !== req.body.password2) {
-            res.status(400).json({ success: false, message: 'Password fields must match' });
+            res.status(400).json({success: false, message: 'Password fields must match'});
             return;
         }
 
@@ -317,7 +318,7 @@ const authenticationController = () => {
                 res.status(err.code).json(err);
                 return;
             } else if (rows.length === 0) {
-                res.status(500).json({ success: false, code: 500, message: 'Could not find user' });
+                res.status(500).json({success: false, code: 500, message: 'Could not find user'});
                 return;
             }
 
@@ -326,7 +327,7 @@ const authenticationController = () => {
             if (isTokenValid(user.Reset_request_date)) {
                 changeUserPassword();
             } else {
-                res.status(401).json({ success: false, code: 401, message: 'Reset time has expired.' });
+                res.status(401).json({success: false, code: 401, message: 'Reset time has expired.'});
                 return;
             }
 
