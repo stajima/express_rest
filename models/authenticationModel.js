@@ -156,7 +156,7 @@ let authenticationModel = () => {
                                     });
                                 }
                                 console.log("New user added to the DB.");
-                                callback(null, results);
+                                callback(null);
                             });
                         });
                     });

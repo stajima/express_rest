@@ -87,9 +87,8 @@ const authenticationController = () => {
         generateHash(plainTextPassword, (generatedHash) => {
             newUser.Hash = generatedHash;
             // console.log('User: ' + JSON.stringify(newUser));
-            authenticationModel.addNewUser(newUser, (err, result) => {
+            authenticationModel.addNewUser(newUser, (err) => {
                 if (!err) {
-                    console.log(result);
                     //User add was successful
                     res.status(201).json({
                         success: true,
@@ -170,7 +169,7 @@ const authenticationController = () => {
 
                     //generate 50 character resetToken and current moment
                     let resetToken = crypto.randomBytes(64).toString('hex').slice(0, 50);
-                    var now = moment().format();
+                    let now = moment().format();
 
                     //TODO store resetToken and reset_request_date in users row
                     authenticationModel.addResetFields(user.UID, resetToken, now, (err, success) => {
