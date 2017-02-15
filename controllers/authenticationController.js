@@ -336,7 +336,16 @@ const authenticationController = () => {
                 res.status(401).json({success: false, code: 401, message: 'Reset time has expired.'});
             }
         });
+    };
 
+    /**
+     * Handle logout of a user
+     * @param req
+     * @param res
+     */
+    let logout = (req, res) => {
+        req.logout();
+        res.redirect('/');
     };
 
     return {
@@ -345,7 +354,8 @@ const authenticationController = () => {
         register: register,
         sendResetEmail: sendResetEmail,
         sendResetForm: sendResetForm,
-        passwordFormSubmit: passwordFormSubmit
+        passwordFormSubmit: passwordFormSubmit,
+        logout: logout
     };
 };
 

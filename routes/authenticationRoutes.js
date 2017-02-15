@@ -42,6 +42,11 @@ const routes = function () {
      */
     authenticationRouter.post('/reset_password/:resetToken', authenticationController.passwordFormSubmit);
 
+    /**
+     * GET logout route to logout a user
+     */
+    authenticationRouter.get('/logout', authenticationController.logout);
+
     return authenticationRouter;
 };
 
