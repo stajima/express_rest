@@ -102,6 +102,7 @@ const authenticationController = () => {
                     });
 
                 } else {
+                    err.success = false;
                     res.status(500).send(err);
                 }
             });
@@ -181,7 +182,7 @@ const authenticationController = () => {
 
                     authenticationModel.addResetFields(user.UID, resetToken, now, (err, success) => {
                         if (err) {
-                            res.status(err.code).json({success: false, message: err.message});
+                            res.status(err.code).json({success: false, message: err.message, err: err});
                         } else {
                             //TODO use first and last name in email
                             //Generate email HTML and text
@@ -244,6 +245,7 @@ const authenticationController = () => {
 
             if (err) {
                 //TODO return error to reset form
+                err.success = false;
                 res.status(err.code).send(err);
             } else if (rows.length > 0) {
                 let user = rows[0];
@@ -281,7 +283,6 @@ const authenticationController = () => {
                     if (err) {
                         err.success = false;
                         res.status(err.code).json(err);
-                        return;
                     } else {
                         let htmlBody = '<h1>Hi ' + user.DBID + ',</h1>';
 
@@ -292,16 +293,15 @@ const authenticationController = () => {
                                 res.status(500).json({
                                     success: true,
                                     code: 500,
-                                    message: 'User Password has been changed but there was an error while sending the confirmation email.'
+                                    message: 'User Password has been changed but there was an error while sending the confirmation email.',
+                                    err: err
                                 });
-                                return;
                             } else {
                                 res.status(200).json({
                                     success: true,
                                     code: 200,
                                     message: 'User Password has been changed and a confirmation email has been sent.'
                                 });
-                                return;
                             }
                         });
                     }
@@ -334,9 +334,7 @@ const authenticationController = () => {
                 changeUserPassword();
             } else {
                 res.status(401).json({success: false, code: 401, message: 'Reset time has expired.'});
-                return;
             }
-
         });
 
     };

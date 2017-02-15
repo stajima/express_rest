@@ -92,7 +92,7 @@ let authenticationModel = () => {
                     connection.release();
                     console.log("Connection released");
                     console.log(err);
-                    callback(err);
+                    callback({code: 500, message: 'Failed to add new user', err: err});
                 }
 
                 //first query
@@ -102,7 +102,7 @@ let authenticationModel = () => {
                         console.log("Connection released");
                         return connection.rollback(function () {
                             console.log(err);
-                            callback(err);
+                            callback({code: 500, message: 'Failed to add new user', err: err});
                         });
                     }
 
@@ -114,7 +114,7 @@ let authenticationModel = () => {
                             console.log("Connection released");
                             return connection.rollback(function () {
                                 console.log(err);
-                                callback(err);
+                                callback({code: 500, message: 'Failed to add new user', err: err});
                             });
                         }
 
@@ -126,7 +126,7 @@ let authenticationModel = () => {
                                 console.log("Connection released");
                                 return connection.rollback(function () {
                                     console.log(err);
-                                    callback(err);
+                                    callback({code: 500, message: 'Failed to add new user', err: err});
                                 });
                             }
 
@@ -137,7 +137,7 @@ let authenticationModel = () => {
                                 if (err) {
                                     return connection.rollback(function () {
                                         console.log(err);
-                                        callback(err);
+                                        callback({code: 500, message: 'Failed to add new user', err: err});
                                     });
                                 }
                                 console.log("New user added to the DB.");
@@ -162,7 +162,7 @@ let authenticationModel = () => {
                 console.log("Connection released");
                 if (err) {
                     console.log(err);
-                    callback({code: 500, message: err});
+                    callback({code: 500, message: "Error in connection database", err: err});
                 } else {
                     callback(null, rows[0]);
                 }
@@ -184,7 +184,7 @@ let authenticationModel = () => {
                 console.log("Connection released");
                 if (err) {
                     console.log(err);
-                    callback({code: 500, message: "Error in connection database"});
+                    callback({code: 500, message: "Error in connection database", err: err});
                 } else {
                     // console.log(rows);
                     callback(null, true);
@@ -233,7 +233,7 @@ let authenticationModel = () => {
             console.log(query);
             connection.query(query, (err, result) => {
                 if (err) {
-                    callback({code: 500, err: err, message: 'Failed to reset the password'});
+                    callback({code: 500, message: 'Failed to reset the password', err: err});
                 } else {
                     callback(null, result);
                 }
