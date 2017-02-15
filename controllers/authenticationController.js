@@ -75,7 +75,7 @@ const authenticationController = () => {
         newUser.DBID = 'dbid' + Math.floor((new Date()).getTime() / 1000);
         newUser.ID = req.body['ID'] || crypto.randomBytes(64).toString('hex').substring(0, 6);
         newUser.UID = req.body['UID'] || crypto.randomBytes(64).toString('hex').substring(0, 10);
-        newUser.AgentID = req.body['UID'] || crypto.randomBytes(64).toString('hex').substring(0, 10); //in the agents table AgentID is the same as UID in DBID & Auth
+        newUser.AgentID = req.body['UID'] || newUser.UID; //in the agents table AgentID is the same as UID in DBID & Auth
         newUser.FirstName = 'John';
         newUser.LastName = 'Doe';
         newUser.Email1 = 'test@email.com';
@@ -173,32 +173,33 @@ const authenticationController = () => {
                     });
                 } else {
                     console.log('User found');
+                    // console.log(user);
 
                     //generate 50 character resetToken and current moment
                     let resetToken = crypto.randomBytes(64).toString('hex').slice(0, 50);
                     let now = moment().format();
 
-                    //TODO store resetToken and reset_request_date in users row
                     authenticationModel.addResetFields(user.UID, resetToken, now, (err, success) => {
                         if (err) {
                             res.status(err.code).json({success: false, message: err.message});
                         } else {
+                            //TODO use first and last name in email
                             //Generate email HTML and text
                             let resetLink = 'http://www.' + config.domain + '/api/auth/reset_password/' + resetToken;
 
                             //Email header
-                            let htmlBody = '<h1>Hi ' + user.DBID + ',</h1>';
+                            let htmlBody = '<h1>Aloha ' + user.FirstName + ' ' + user.LastName + ',</h1>';
 
                             //Button to reset user password
                             let resetBtn = '<div><!--[if mso]> <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="http://" style="height:40px;v-text-anchor:middle;width:200px;" arcsize="10%" strokecolor="#1e3650" fillcolor="#ff8a0f"> <w:anchorlock/> <center style="color:#ffffff;font-family:sans-serif;font-size:13px;font-weight:bold;">RESET MY PASSWORD</center> </v:roundrect> <![endif]--><a href="' + resetLink + '" style="background-color:#ff8a0f;border:1px solid #1e3650;border-radius:4px;color:#ffffff;display:inline-block;font-family:sans-serif;font-size:13px;font-weight:bold;line-height:40px;text-align:center;text-decoration:none;width:200px;-webkit-text-size-adjust:none;mso-hide:all;">RESET MY PASSWORD</a></div>';
 
                             htmlBody += '<p>You recently requested a password reset on your REALTORS Association of Maui IDX administrative account.</p>' + resetBtn +
                                 '<p>If you did not request a password reset, please ignore this email. This password reset is only valid for the next 10 minutes.</p>' +
-                                '<p>Aloha,</p><p>The REALTORS Association of Maui team</p>';
+                                '<p>Mahalo,</p><p>The REALTORS Association of Maui team</p>';
 
                             //Footer
-                            htmlBody += '<hr><p>If you are having trouble clicking the password reset button, copy and paste the URL below into your web browser.</p>' +
-                                '<p><a href="' + resetLink + '">' + resetLink + '</a></p>';
+                            htmlBody += '<hr><i>If you are having trouble clicking the password reset button, copy and paste the URL below into your web browser.</i></br>' +
+                                '<i><a href="' + resetLink + '">' + resetLink + '</a></i>';
 
                             sendEmail('reset', 'shanetajima@gmail.com', 'RAM IDX Password Reset Request', htmlBody, (err, info) => {
                                 if (err) {

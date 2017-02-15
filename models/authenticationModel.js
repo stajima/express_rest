@@ -81,21 +81,6 @@ let authenticationModel = () => {
     let addNewUser = (newUser, callback) => {
 
         getConnection((err, connection) => {
-            /**
-             * If there's an error while getting a connection then pass back
-             * a status of 500 and with an error message. If at any time there is a DB connection
-             * error then do the same.
-             */
-            if (err) {
-                callback({code: 500, status: "Error in connection database"});
-                return;
-            } else {
-                console.log("connected as id " + connection.threadId);
-                connection.on('error', (err) => {
-                    callback({code: 500, status: "Error in connection database", err: err});
-                });
-            }
-
             let queryArray = createInsertStatement(newUser, connection);
 
             /**
@@ -171,22 +156,7 @@ let authenticationModel = () => {
     let findUserByUID = (UID, callback) => {
 
         getConnection((err, connection) => {
-            /**
-             * If there's an error while getting a connection then pass back
-             * a status of 500 and with an error message. If at any time there is a DB connection
-             * error then do the same.
-             */
-            if (err) {
-                callback({code: 500, message: "Error in connection database"});
-                return;
-            } else {
-                console.log("connected as id " + connection.threadId);
-                connection.on('error', (err) => {
-                    callback({code: 500, message: "Error in connection database", err: err});
-                });
-            }
-
-            let query = "SELECT * FROM DBID WHERE UID = " + connection.escape(UID);
+            let query = "SELECT DBID.*, Agents.* FROM DBID INNER JOIN Agents ON DBID.UID = Agents.AgentID WHERE UID = " + connection.escape(UID) + ";";
             connection.query(query, (err, rows) => {
                 connection.release();
                 console.log("Connection released");
@@ -207,23 +177,6 @@ let authenticationModel = () => {
     let addResetFields = (UID, resetToken, resetDate, callback) => {
 
         getConnection((err, connection) => {
-
-            /**
-             * If there's an error while getting a connection then pass back
-             * a status of 500 and with an error message. If at any time there is a DB connection
-             * error then do the same.
-             */
-            if (err) {
-                console.log(err);
-                callback({code: 500, status: "Error in connection database"});
-                return;
-            } else {
-                console.log("connected as id " + connection.threadId);
-                connection.on('error', (err) => {
-                    callback({code: 500, message: "Error in connection database", err: err});
-                });
-            }
-
             let query = "UPDATE Authentication SET Reset_token = '" + resetToken + "', Reset_request_date = '" + resetDate + "' WHERE UID = '" + UID + "';";
             console.log(query);
             connection.query(query, (err, rows) => {
@@ -247,22 +200,6 @@ let authenticationModel = () => {
     let getUserWithToken = (token, callback) => {
         console.log('Attempting to find reset_token: ' + token);
         getConnection((err, connection) => {
-            /**
-             * If there's an error while getting a connection then pass back
-             * a status of 500 and with an error message. If at any time there is a DB connection
-             * error then do the same.
-             */
-            if (err) {
-                console.log(err);
-                callback({code: 500, status: "Error in connection database", err: err});
-                return;
-            } else {
-                console.log("connected as id " + connection.threadId);
-                connection.on('error', (err) => {
-                    callback({code: 500, message: "Error in connection database", err: err});
-                });
-            }
-
             let query = 'SELECT * FROM Authentication WHERE Reset_token = ' + connection.escape(token) + ';';
             console.log(query);
             connection.query(query, (err, rows) => {
@@ -291,22 +228,6 @@ let authenticationModel = () => {
     let updateHash = (newHash, resetToken, callback) => {
 
         getConnection((err, connection) => {
-            /**
-             * If there's an error while getting a connection then pass back
-             * a status of 500 and with an error message. If at any time there is a DB connection
-             * error then do the same.
-             */
-            if (err) {
-                console.log(err);
-                callback({code: 500, status: "Error in connection database", err: err});
-                return;
-            } else {
-                console.log("connected as id " + connection.threadId);
-                connection.on('error', (err) => {
-                    callback({code: 500, message: "Error in connection database", err: err});
-                });
-            }
-
             //Change Hash to new password hash and remove reset_token
             let query = 'UPDATE Authentication SET Hash = ' + connection.escape(newHash) + ', Reset_token = NULL ' + 'WHERE Reset_token = ' + connection.escape(resetToken) + ';';
             console.log(query);
