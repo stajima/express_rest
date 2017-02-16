@@ -12,12 +12,12 @@ var dbidModel = function () {
 
         getConnection(function (err, connection) {
             if (err) {
-                callback({ "code": 500, "status": "Error in connection database" });
+                callback({"code": 500, "status": "Error in connection database"});
                 return;
             } else {
                 console.log('connected as id ' + connection.threadId);
                 connection.on('error', function (err) {
-                    callback({ "code": 500, "status": "Error in connection database" });
+                    callback({"code": 500, "status": "Error in connection database"});
                     return;
                 });
             }
@@ -35,7 +35,7 @@ var dbidModel = function () {
     }
 
     return {
-        getAlldbids: getAlldbids
+        getAllDbids: getAlldbids
     }
 
 }

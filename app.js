@@ -47,9 +47,8 @@ app.use('/api/dbids', dbidRouter);
 const authenticationRouter = require('./routes/authenticationRoutes')();
 app.use('/api/auth', authenticationRouter);
 
-/*
 app.get('/password_reset', (req, res) => {
-    if (false) {
+    if (true) {
         console.log('User found. Token valid. Sending password reset form.');
         res.render('password_reset');
     }
@@ -61,7 +60,7 @@ app.get('/password_reset', (req, res) => {
             disableForm: 'disabled'
         });
     }
-    if (true) {
+    if (false) {
         //No users found
         res.render('password_reset', {
             error: 'This link is not valid or may have expired. ' +
@@ -70,7 +69,6 @@ app.get('/password_reset', (req, res) => {
         });
     }
 });
-*/
 
 /**
  * Start express server.
