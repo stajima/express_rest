@@ -19,6 +19,7 @@ app.use(logger('dev')); // Log requests to API using morgan
 app.use(bodyParser.urlencoded({extended: true})); //support parsing of application/x-www-form-urlencoded post data
 app.use(bodyParser.json()); //support parsing of application/json type post data
 app.use(passport.initialize());
+app.use(express.static('public'));
 app.set('views', './views');
 app.engine('.hbs', handlebars({extname: '.hbs'}));
 app.set('view engine', '.hbs');
