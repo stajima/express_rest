@@ -239,30 +239,35 @@ const authenticationController = () => {
     /**
      * Return password reset form if resetToken is valid and unexpired
      */
-    let sendResetForm = (req, res) => {
+    let renderResetForm = (req, res) => {
         console.log('reset token: ' + req.params.resetToken);
         authenticationModel.getUserWithToken(req.params.resetToken, (err, rows) => {
-
             if (err) {
-                //TODO return error to reset form
-                err.success = false;
-                res.status(err.code).send(err);
+                console.log(err);
+                res.render('password_reset', {
+                    error: 'There was an error when attempting to validate your account.',
+                    disableForm: 'disabled'
+                });
             } else if (rows.length > 0) {
                 let user = rows[0];
                 //A user was found
                 /*jshint camelcase: false */
                 if (isTokenValid(user.Reset_request_date)) {
                     console.log('User found. Token valid. Sending password reset form.');
-                    res.sendFile(path.join(path.resolve(__dirname, '..'), 'views', 'password_reset.html'));
-
+                    res.render('password_reset');
                 } else {
-                    //TODO error
-                    res.status(403).send('Token expired');
+                    //token expired
+                    res.render('password_reset', {
+                        error: 'This link is not valid or may have expired. Please request another reset.',
+                        disableForm: 'disabled'
+                    });
                 }
             } else {
                 //No users found
-                //TODO return error to reset form
-                res.status(404).send('This link is not valid.');
+                res.render('password_reset', {
+                    error: 'This link is not valid or may have expired. Please request another reset.',
+                    disableForm: 'disabled'
+                });
             }
         });
 
@@ -353,7 +358,7 @@ const authenticationController = () => {
         verify: verify,
         register: register,
         sendResetEmail: sendResetEmail,
-        sendResetForm: sendResetForm,
+        renderResetForm: renderResetForm,
         passwordFormSubmit: passwordFormSubmit,
         logout: logout
     };

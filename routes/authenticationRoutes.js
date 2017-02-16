@@ -1,9 +1,7 @@
 const express = require('express');
 const passport = require('passport');
-const requireLogin = passport.authenticate('local', { session: false });
-const requireAuth = passport.authenticate('jwt', { session: false });
-
-
+const requireLogin = passport.authenticate('local', {session: false});
+const requireAuth = passport.authenticate('jwt', {session: false});
 
 /**
  * Routes regarding /api/auth
@@ -14,12 +12,12 @@ const routes = function () {
 
     /*
      * If POST /login is requested use the authenticationController login method.
-    */
+     */
     authenticationRouter.post('/login', requireLogin, authenticationController.login);
 
-    /** 
+    /**
      * GET Dashboard route protected by JWT and used for verifying user.
-    */
+     */
     authenticationRouter.get('/dashboard', requireAuth, authenticationController.verify);
 
     /**
@@ -35,7 +33,7 @@ const routes = function () {
     /**
      * GET reset_password route used to respond to incoming request from a users reset email link
      */
-    authenticationRouter.get('/reset_password/:resetToken', authenticationController.sendResetForm);
+    authenticationRouter.get('/reset_password/:resetToken', authenticationController.renderResetForm);
 
     /**
      * Handle submission of reset password form
